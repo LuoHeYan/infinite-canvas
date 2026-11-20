@@ -1,4 +1,6 @@
 import i18n from "@/i18n";
+
+export const CANVAS_COMPACT_QUERY = "(width < 64rem)";
 import { CanvasNodeType } from "@/types/canvas";
 import type { CanvasNodeMetadata } from "@/types/canvas";
 import { getNodeSpec as getRegistryNodeSpec } from "@/lib/canvas/node-registry";

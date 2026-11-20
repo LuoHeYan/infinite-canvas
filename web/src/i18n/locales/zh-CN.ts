@@ -240,6 +240,7 @@ export default {
         undo: "撤销",
         redo: "重做",
         openMenu: "打开画布菜单",
+        moreActions: "更多操作",
         renameHint: "双击修改画布名称",
         shortcuts: "快捷键",
         miniMapOpen: "打开小地图",
@@ -301,6 +302,10 @@ export default {
         agentOps: { add_node: "新增节点", update_node: "更新节点", delete_node: "删除节点", delete_connections: "删除连线", connect_nodes: "连接", set_viewport: "调整视图", select_nodes: "选择节点", run_generation: "触发生成" },
         pluginErrors: { invalidExport: "插件未导出有效对象", missingFields: "插件缺少 id 或 nodes", downloadFailed: "下载失败 (HTTP {{status}})", registryFailed: "获取官方插件列表失败 (HTTP {{status}})" },
         shortcut: {
+            touchPan: "单指拖动空白处",
+            touchNode: "单指拖动节点",
+            touchZoom: "双指捏合或张开",
+            moveNode: "移动节点",
             dragCanvas: "拖动画布",
             pan: "平移视图",
             toggleTool: "临时切换选择 / 移动",

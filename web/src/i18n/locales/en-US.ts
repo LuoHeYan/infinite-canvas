@@ -240,6 +240,7 @@ export default {
         undo: "Undo",
         redo: "Redo",
         openMenu: "Open canvas menu",
+        moreActions: "More actions",
         renameHint: "Double-click to rename the canvas",
         shortcuts: "Keyboard shortcuts",
         miniMapOpen: "Open minimap",
@@ -301,6 +302,10 @@ export default {
         agentOps: { add_node: "Add node", update_node: "Update node", delete_node: "Delete node", delete_connections: "Delete connections", connect_nodes: "Connect", set_viewport: "Adjust view", select_nodes: "Select nodes", run_generation: "Run generation" },
         pluginErrors: { invalidExport: "The plugin did not export a valid object", missingFields: "The plugin is missing id or nodes", downloadFailed: "Download failed (HTTP {{status}})", registryFailed: "Failed to load the official plugin registry (HTTP {{status}})" },
         shortcut: {
+            touchPan: "Drag empty space with one finger",
+            touchNode: "Drag a node with one finger",
+            touchZoom: "Pinch or spread two fingers",
+            moveNode: "Move node",
             dragCanvas: "Drag canvas",
             pan: "Pan view",
             toggleTool: "Temporarily switch Select / Move",

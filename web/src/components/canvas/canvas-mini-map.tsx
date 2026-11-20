@@ -96,10 +96,10 @@ export function Minimap({ nodes, viewport, viewportSize, onViewportChange }: { n
     };
 
     return (
-        <div className="absolute bottom-24 left-6 z-50 overflow-hidden rounded-lg border shadow-2xl backdrop-blur-sm" style={{ width, height, background: theme.toolbar.panel, borderColor: theme.toolbar.border }}>
+        <div className="absolute bottom-24 left-6 z-50 overflow-hidden rounded-lg border shadow-2xl backdrop-blur-sm max-lg:bottom-[calc(8rem+env(safe-area-inset-bottom))] max-lg:left-2 max-lg:z-40" style={{ width, height, background: theme.toolbar.panel, borderColor: theme.toolbar.border }}>
             <div
                 ref={containerRef}
-                className="relative h-full w-full cursor-crosshair"
+                className="relative h-full w-full touch-none cursor-crosshair"
                 onPointerDown={(event) => {
                     event.preventDefault();
                     event.currentTarget.setPointerCapture(event.pointerId);
@@ -110,6 +110,7 @@ export function Minimap({ nodes, viewport, viewportSize, onViewportChange }: { n
                     if (isDragging) updateViewportFromEvent(event);
                 }}
                 onPointerUp={() => setIsDragging(false)}
+                onPointerCancel={() => setIsDragging(false)}
                 onPointerLeave={() => setIsDragging(false)}
             >
                 {nodes.map((node) => {

@@ -24,8 +24,8 @@ export function CanvasZoomControls({ scale, onScaleChange, onReset, isMiniMapOpe
     const activeStyle = { background: theme.toolbar.activeBg, color: theme.toolbar.activeText };
 
     return (
-        <div className="absolute bottom-5 left-5 z-50" onMouseDown={(event) => event.stopPropagation()} onPointerDown={(event) => event.stopPropagation()}>
-            <div className="flex h-14 items-center gap-1 rounded-xl border px-2 shadow-lg backdrop-blur" style={dockStyle}>
+        <div className="absolute bottom-5 left-5 z-50 max-lg:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] max-lg:left-2 max-lg:z-40" onMouseDown={(event) => event.stopPropagation()} onPointerDown={(event) => event.stopPropagation()}>
+            <div className="flex h-14 items-center gap-1 rounded-xl border px-2 shadow-lg backdrop-blur max-lg:h-12 max-lg:[&_button]:h-11! max-lg:[&_button]:w-11!" style={dockStyle}>
                 <Tooltip title={isMiniMapOpen ? t("canvas.miniMapClose") : t("canvas.miniMapOpen")}>
                     <Button
                         type="text"
@@ -46,7 +46,7 @@ export function CanvasZoomControls({ scale, onScaleChange, onReset, isMiniMapOpe
                         max="500"
                         step="1"
                         value={Math.round(scale * 100)}
-                        className="w-24"
+                        className="w-24 max-lg:h-11 max-lg:w-16"
                         style={{ accentColor: theme.node.activeStroke }}
                         onChange={(event) => onScaleChange(Number(event.target.value) / 100)}
                         aria-label={t("canvas.zoom")}
@@ -60,7 +60,12 @@ export function CanvasZoomControls({ scale, onScaleChange, onReset, isMiniMapOpe
                 </Tooltip>
             </div>
             <Modal title={t("canvas.shortcuts")} open={shortcutsOpen} onCancel={() => setShortcutsOpen(false)} footer={null} centered>
-                <div className="space-y-3 border-t pt-4 text-sm" style={{ borderColor: theme.node.stroke }}>
+                <div className="hidden space-y-3 border-t pt-4 text-sm pointer-coarse:block" style={{ borderColor: theme.node.stroke }}>
+                    <Shortcut label={t("canvas.shortcut.touchPan")} value={t("canvas.shortcut.pan")} />
+                    <Shortcut label={t("canvas.shortcut.touchNode")} value={t("canvas.shortcut.moveNode")} />
+                    <Shortcut label={t("canvas.shortcut.touchZoom")} value={t("canvas.shortcut.zoom")} />
+                </div>
+                <div className="space-y-3 border-t pt-4 text-sm pointer-coarse:hidden" style={{ borderColor: theme.node.stroke }}>
                     <Shortcut label={`Ctrl / Space + ${t("canvas.shortcut.drag")}`} value={t("canvas.shortcut.toggleTool")} />
                     <Shortcut label={t("canvas.shortcut.wheel")} value={t("canvas.shortcut.zoom")} />
                     <Shortcut label={t("canvas.shortcut.drag")} value={t("canvas.shortcut.boxSelect")} />

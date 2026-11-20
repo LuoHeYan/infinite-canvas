@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { CANVAS_COMPACT_QUERY } from "@/constant/canvas";
 
 export const CANVAS_SIDE_PANEL_MOTION_MS = 500;
 export const CANVAS_SIDE_PANEL_MIN_WIDTH = 220;
@@ -20,7 +21,8 @@ function initialWidth() {
 
 function initialOpen() {
     if (typeof window === "undefined") return true;
-    return localStorage.getItem(OPEN_KEY) !== "0";
+    const stored = localStorage.getItem(OPEN_KEY);
+    return stored === null ? !window.matchMedia(CANVAS_COMPACT_QUERY).matches : stored !== "0";
 }
 
 function initialNodeView(): CanvasNodeViewMode {
