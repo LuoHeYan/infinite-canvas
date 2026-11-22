@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent } from "react";
 import { App, Empty, Input, Popconfirm, Select, Spin, Tag } from "antd";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Check, ChevronRight, Download, Eye, FileText, Image as ImageIcon, LayoutGrid, ListChecks, Music2, Plus, Rows3, Search, Settings2, Square, Trash2, Type, Video } from "lucide-react";
+import { ArrowUpRight, BookOpen, Check, ChevronRight, Download, Eye, FileText, Image as ImageIcon, LayoutGrid, ListChecks, Music2, Plus, Rows3, Search, Settings2, Square, Trash2, Type, Video } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +24,13 @@ import type { InsertAssetPayload } from "./asset-picker-modal";
 const PANEL_MOTION_SECONDS = CANVAS_SIDE_PANEL_MOTION_MS / 1000;
 const PANEL_EASE = [0.22, 1, 0.36, 1] as const;
 
-type PanelTab = "canvas" | "assets" | "prompts";
+const PANEL_TABS = ["canvas", "assets", "prompts", "references"] as const;
+type PanelTab = (typeof PANEL_TABS)[number];
+
+const REFERENCE_GALLERIES = {
+    poses: { linePose: "https://ai-pose-gallery.pages.dev/", depthPose: "https://ai-pose-depth-gallery.pages.dev/" },
+    outfits: { realisticOutfit: "https://ai-costume-gallery.pages.dev/", animeOutfit: "https://ai-costume-anime-gallery.pages.dev/" },
+} as const;
 
 type Props = {
     nodes: CanvasNodeData[];
@@ -33,6 +39,7 @@ type Props = {
     onPreviewNode: (nodeId: string) => void;
     onHoverNode: (nodeId: string | null) => void;
     onInsertAsset: (payload: InsertAssetPayload) => void;
+    onImportReference: () => void;
 };
 
 const NODE_TYPE_ICON: Record<string, typeof Square> = {
@@ -51,7 +58,7 @@ const STATUS_COLOR: Record<string, string> = {
     idle: "transparent",
 };
 
-export function CanvasSidePanel({ nodes, selectedNodeIds, onFocusNode, onPreviewNode, onHoverNode, onInsertAsset }: Props) {
+export function CanvasSidePanel({ nodes, selectedNodeIds, onFocusNode, onPreviewNode, onHoverNode, onInsertAsset, onImportReference }: Props) {
     const { t } = useTranslation();
     const theme = canvasThemes[useThemeStore((state) => state.theme)];
     const [tab, setTab] = useState<PanelTab>("canvas");
@@ -100,18 +107,18 @@ export function CanvasSidePanel({ nodes, selectedNodeIds, onFocusNode, onPreview
                 style={{ width, background: theme.toolbar.panel, borderColor: theme.toolbar.border, color: theme.node.text }}
                 data-canvas-no-zoom
             >
-                <div className="flex items-center gap-5 px-4 pt-3.5">
-                    <TabButton label={t("canvas.sidePanel.canvas")} active={tab === "canvas"} theme={theme} onClick={() => setTab("canvas")} />
-                    <TabButton label={t("canvas.sidePanel.assets")} active={tab === "assets"} theme={theme} onClick={() => setTab("assets")} />
-                    <TabButton label={t("canvas.sidePanel.prompts")} active={tab === "prompts"} theme={theme} onClick={() => setTab("prompts")} />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3.5">
+                    {PANEL_TABS.map((item) => <TabButton key={item} label={t(`canvas.sidePanel.${item}`)} active={tab === item} theme={theme} onClick={() => setTab(item)} />)}
                 </div>
                 <div className="mt-2 min-h-0 flex-1 overflow-hidden">
                     {tab === "canvas" ? (
                         <CanvasNodesTab nodes={nodes} selectedNodeIds={selectedNodeIds} onFocusNode={onFocusNode} onPreviewNode={onPreviewNode} onHoverNode={onHoverNode} theme={theme} />
                     ) : tab === "assets" ? (
                         <CanvasAssetsTab onInsert={onInsertAsset} theme={theme} />
-                    ) : (
+                    ) : tab === "prompts" ? (
                         <CanvasPromptsTab onInsert={onInsertAsset} theme={theme} />
+                    ) : (
+                        <CanvasReferencesTab onImport={onImportReference} theme={theme} />
                     )}
                 </div>
                 <button type="button" className="absolute inset-y-0 right-0 z-40 w-4 translate-x-1/2 cursor-col-resize max-lg:hidden" onPointerDown={startResize} aria-label={t("canvas.sidePanel.resize")} />
@@ -122,10 +129,40 @@ export function CanvasSidePanel({ nodes, selectedNodeIds, onFocusNode, onPreview
 
 function TabButton({ label, active, theme, onClick }: { label: string; active: boolean; theme: CanvasTheme; onClick: () => void }) {
     return (
-        <button type="button" onClick={onClick} className="relative pb-1.5 text-sm font-semibold transition-opacity" style={{ color: theme.node.text, opacity: active ? 1 : 0.45 }}>
+        <button type="button" onClick={onClick} aria-pressed={active} className="relative whitespace-nowrap pb-1.5 text-sm font-semibold max-lg:min-h-11 max-lg:pb-0" style={{ color: active ? theme.node.text : theme.toolbar.item }}>
             {label}
             {active ? <motion.span layoutId="sidePanelTabIndicator" className="absolute inset-x-0 -bottom-px h-0.5 rounded-full" style={{ background: theme.toolbar.activeText }} transition={{ type: "spring", stiffness: 500, damping: 34 }} /> : null}
         </button>
+    );
+}
+
+function CanvasReferencesTab({ onImport, theme }: { onImport: () => void; theme: CanvasTheme }) {
+    const { t } = useTranslation();
+
+    return (
+        <div className="h-full space-y-4 overflow-y-auto px-4 py-2">
+            <p className="text-xs leading-relaxed" style={{ color: theme.node.muted }}>{t("canvas.sidePanel.referenceGuide")}</p>
+            {Object.entries(REFERENCE_GALLERIES).map(([group, galleries]) => (
+                <section key={group}>
+                    <h3 className="mb-1 text-sm font-semibold">{t(`canvas.sidePanel.referenceGallery.${group}`)}</h3>
+                    <ul className="divide-y rounded-lg border" style={{ borderColor: theme.toolbar.border }}>
+                        {Object.entries(galleries).map(([label, url]) => (
+                            <li key={label} style={{ borderColor: theme.toolbar.border }}>
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-between gap-2 px-3 py-2 text-sm hover:underline" style={{ color: theme.toolbar.item }}>
+                                    {t(`canvas.sidePanel.referenceGallery.${label}`)}
+                                    <ArrowUpRight className="size-3.5 shrink-0" aria-hidden />
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ))}
+            <button type="button" onClick={() => onImport()} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold" style={{ background: theme.toolbar.activeBg, color: theme.toolbar.activeText }}>
+                <Plus className="size-4 shrink-0" aria-hidden />
+                {t("canvas.sidePanel.importReference")}
+            </button>
+            <p className="text-xs leading-relaxed" style={{ color: theme.node.muted }}>{t("canvas.sidePanel.referenceCredit")}</p>
+        </div>
     );
 }
 
